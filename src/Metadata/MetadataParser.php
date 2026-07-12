@@ -101,7 +101,7 @@ final class MetadataParser
             $closePattern = '/<\/([\w]+:)?' . \preg_quote($tagName, '/') . '\s*>/i';
             if (\preg_match($closePattern, $xml, $closeMatch, \PREG_OFFSET_CAPTURE, $offset + \strlen($tagText))) {
                 $closeTag = $closeMatch[0][0];
-                $closePos = $closeMatch[0][1];
+                $closePos = (int) $closeMatch[0][1];
                 $fullElement = \substr($xml, $offset, $closePos + \strlen($closeTag) - $offset);
                 $elements[] = $fullElement;
             } else {
