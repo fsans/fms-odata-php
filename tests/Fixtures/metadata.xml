@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="FMS">
+      <EntityType Name="Contact">
+        <Key>
+          <PropertyRef Name="id"/>
+        </Key>
+        <Property Name="id" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="name" Type="Edm.String" Nullable="true" MaxLength="100"/>
+        <Property Name="email" Type="Edm.String" Nullable="true"/>
+        <Property Name="age" Type="Edm.Int32" Nullable="true"/>
+      </EntityType>
+      <EntityType Name="Order">
+        <Key>
+          <PropertyRef Name="orderId"/>
+        </Key>
+        <Property Name="orderId" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="total" Type="Edm.Double" Nullable="true"/>
+      </EntityType>
+      <EntityContainer Name="FMSContainer">
+        <EntitySet Name="Contacts" EntityType="FMS.Contact"/>
+        <EntitySet Name="Orders" EntityType="FMS.Order"/>
+      </EntityContainer>
+      <Action Name="MyScript" IsBound="true">
+        <Parameter Name="parameter" Type="FMS.Contact"/>
+        <Parameter Name="scriptResult" Type="FMS.ScriptResult"/>
+      </Action>
+      <Annotation Term="Org.OData.Core.V1.ProductVersion" String="21.1.2.500"/>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
