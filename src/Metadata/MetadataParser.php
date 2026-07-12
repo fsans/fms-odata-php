@@ -91,6 +91,7 @@ final class MetadataParser
         }
 
         foreach ($matches[0] as [$fullTag, $offset]) {
+            $offset = (int) $offset;
             $tagText = $fullTag;
             if (\str_ends_with(\trim($tagText), '/>')) {
                 $elements[] = $tagText;
