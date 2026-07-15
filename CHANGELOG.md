@@ -5,6 +5,21 @@ All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] — 2026-07-15
+
+### Fixed
+
+- Cast `preg_match` opening-tag offset to `int` in `MetadataParser` to
+  satisfy static analysis (`PREG_OFFSET_CAPTURE` returns `int|string`
+  depending on PHP version).
+- Cast `preg_match` close-tag offset to `int` in `MetadataParser` for
+  the same reason.
+
+### Docs
+
+- Add status badges (PHP, OData, FileMaker, runtime deps, license, spec,
+  DeepWiki) to `README.md`.
+
 ## [1.0.0] — 2025-07-12
 
 ### Added
