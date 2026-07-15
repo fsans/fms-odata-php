@@ -1,5 +1,13 @@
 # fms-odata-php
 
+[![PHP](https://img.shields.io/badge/PHP-%3E%3D8.2-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![OData](https://img.shields.io/badge/OData-v4-0078D4?logo=data&logoColor=white)](https://www.odata.org/)
+[![FileMaker](https://img.shields.io/badge/FileMaker-20.0--26.0-FF6B00?logo=filemaker&logoColor=white)](https://www.claris.com/filemaker/)
+[![Deps](https://img.shields.io/badge/runtime%20deps-1-blue)](./composer.json)
+[![License](https://img.shields.io/badge/license-MIT-black)](./LICENSE)
+[![Spec](https://img.shields.io/badge/spec-fms--odata--spec-FF6B00?logo=filemaker&logoColor=white)](https://github.com/fsans/fms-odata-spec)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fsans/fms-odata-php)
+
 PHP client for the Claris FileMaker Server OData v4 API.
 
 Functional equivalent of [fms-odata-js](https://github.com/fsans/fms-odata-js)
