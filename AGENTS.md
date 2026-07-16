@@ -22,7 +22,7 @@ the full alignment plan.
 
 ```bash
 composer install        # install dependencies
-composer test           # PHPUnit (197 tests)
+composer test           # PHPUnit (238 tests)
 composer analyse        # PHPStan level max
 composer check          # tests + static analysis
 ```
@@ -46,10 +46,14 @@ The client is layered into pure request builders and an HTTP execution layer:
 
 - **Query, Filter, EntityRef, Url** — build pure request data (URLs, filter
   expressions, key references). No direct cURL calls.
+- **ScriptInvoker** — FileMaker script invocation at database, entity-set,
+  and record scope (by name or FMSID). Reuses spec-php script helpers.
+- **ContainerRef** — container field download (binary), upload (binary or
+  base64), and clear. MIME sniffing and Content-Disposition via spec-php.
 - **HttpClient** — handles auth, OData headers, 401 retry, JSON/XML decoding,
   and error conversion. Uses a `TransportInterface` for the actual HTTP call.
 - **CurlTransport** — the production transport, using PHP's built-in cURL
-  extension. The only transport shipped with the MVP.
+  extension. The only transport shipped.
 - **MockTransport** (test only) — deterministic in-memory transport for
   offline test execution.
 - **MetadataParser / MetadataFetcher** — parse `$metadata` XML and cache the
@@ -60,7 +64,8 @@ The client is layered into pure request builders and an HTTP execution layer:
 ## Key source files
 
 - `src/Client.php` — `Client` entry point, base URL construction, version
-  detection, feature gating, low-level request methods
+  detection, feature gating, low-level request methods, `script()` /
+  `scriptById()`
 - `src/FMSOData.php` — thin alias subclass of `Client`
 - `src/ClientOptions.php` — configuration DTO (host, database, token,
   transport, timeout, SSL)
@@ -70,10 +75,18 @@ The client is layered into pure request builders and an HTTP execution layer:
 - `src/Http/TransportInterface.php` — single request/response contract
 - `src/Http/Request.php`, `Response.php` — neutral HTTP DTOs
 - `src/Query/Query.php` — fluent query builder + serialization + execution
+  + `script()` (entity-set scope)
 - `src/Query/Filter.php`, `FilterFactory.php` — $filter expression builder
-- `src/Entity/EntityRef.php` — single-record CRUD handle
+- `src/Entity/EntityRef.php` — single-record CRUD handle + `script()`
+  (record scope) + `container()` + `patchContainers()`
 - `src/Entity/EntityWriteOptions.php` — PATCH/DELETE options (If-Match,
   return representation)
+- `src/Scripts/ScriptInvoker.php` — script invocation handle (3 scopes,
+  name/FMSID, envelope parsing, error promotion)
+- `src/Containers/ContainerRef.php` — container field I/O (get, getStream,
+  upload binary/base64, delete, Content-Disposition parsing)
+- `src/Containers/ContainerDownloadResult.php` — download result DTO with
+  `size` field (parity with JS/Python)
 - `src/Metadata/MetadataParser.php` — regex-based CSDL XML parser
 - `src/Metadata/MetadataFetcher.php` — cached $metadata fetcher
 

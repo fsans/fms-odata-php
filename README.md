@@ -15,9 +15,13 @@ and [fms-odata-py](https://github.com/fsans/fms-odata-py).
 
 ## Status
 
-**MVP** — core client functionality is implemented: configuration, cURL-backed
-HTTP transport with auth and 401 retry, fluent query builder, entity CRUD,
-metadata parsing, version detection, and feature gating.
+Core client functionality is implemented: configuration, cURL-backed HTTP
+transport with auth and 401 retry, fluent query builder, entity CRUD,
+script execution, container field I/O, metadata parsing, version
+detection, and feature gating.
+
+> **Note:** `$batch`, schema DDL, and webhook management are not yet
+> ported from the JS/Python clients. See the roadmap section below.
 
 ## Spec alignment
 
@@ -79,6 +83,53 @@ $client->from('Contacts')->byKey(42)->patch(
 // Delete a record
 $client->from('Contacts')->byKey(42)->delete();
 
+// Run a FileMaker script at database scope
+$result = $client->script('Greet', parameter: 'world');
+echo $result->resultParameter;  // text result from Exit Script
+
+// Run a script by FMSID (v26+; survives renames)
+$client->scriptById(42, parameter: 'hello');
+
+// Run a script at entity-set scope
+$client->from('Contacts')->script('ValidateAll');
+
+// Run a script at record scope (current record = this entity)
+$client->from('Contacts')->byKey(42)->script('Notify', parameter: 'updated');
+
+// Download a container field
+$dl = $client->from('Contacts')->byKey(42)->container('Photo')->get();
+echo $dl->size;           // byte length
+echo $dl->contentType;    // e.g. image/png
+echo $dl->filename;       // parsed from Content-Disposition
+\file_put_contents('/tmp/photo.png', $dl->data);
+
+// Upload to a container field (binary, MIME auto-sniffed from magic bytes)
+$client->from('Contacts')->byKey(42)->container('Photo')->upload(
+    data: \file_get_contents('/tmp/photo.png'),
+    filename: 'photo.png',
+);
+
+// Upload via base64 JSON (for multi-field or mixed container+regular updates)
+use FmsOData\Spec\Containers\ContainerEncoding;
+$client->from('Contacts')->byKey(42)->container('Photo')->upload(
+    data: \file_get_contents('/tmp/photo.png'),
+    contentType: 'image/png',
+    filename: 'photo.png',
+    encoding: ContainerEncoding::BASE64,
+);
+
+// Update multiple container fields + regular fields in one request
+$client->from('Contacts')->byKey(42)->patchContainers(
+    [
+        'Photo' => ['data' => $pngBytes, 'contentType' => 'image/png', 'filename' => 'p.png'],
+        'Doc'   => ['data' => $pdfBytes, 'contentType' => 'application/pdf'],
+    ],
+    ['name' => 'Jane'],
+);
+
+// Clear a container field
+$client->from('Contacts')->byKey(42)->container('Photo')->delete();
+
 // Fetch metadata
 $metadata = $client->metadata();
 echo $metadata->namespace . "\n";
@@ -98,10 +149,14 @@ The client is layered into pure request builders and an HTTP execution layer:
 
 - **Query, Filter, EntityRef, Url** — build pure request data (URLs, filter
   expressions, key references). No direct cURL calls.
+- **ScriptInvoker** — FileMaker script invocation at database, entity-set,
+  and record scope (by name or FMSID). Reuses spec-php script helpers.
+- **ContainerRef** — container field download (binary), upload (binary or
+  base64), and clear. MIME sniffing and Content-Disposition via spec-php.
 - **HttpClient** — handles auth, OData headers, 401 retry, JSON/XML decoding,
   and error conversion. Uses a `TransportInterface` for the actual HTTP call.
 - **CurlTransport** — the production transport, using PHP's built-in cURL
-  extension. The only transport shipped with the MVP.
+  extension. The only transport shipped.
 - **MockTransport** (test only) — deterministic in-memory transport for
   offline test execution.
 - **MetadataParser / MetadataFetcher** — parse `$metadata` XML and cache the
@@ -125,11 +180,20 @@ are sourced from `FmsOData\Spec` (the `fsans/fms-odata-spec-php` package).
 - `Prefer` header: `return=minimal` (default) or `return=representation`.
 - `ETag`/`If-Match`: for optimistic concurrency on PATCH and DELETE.
 
+## Roadmap
+
+The following features are implemented in the JS and Python clients but not
+yet ported to PHP:
+
+- `$batch` multipart request composer
+- Schema DDL (create/delete tables, fields, indexes)
+- Webhook management (create, remove, get, invoke)
+
 ## Development
 
 ```bash
 composer install
-composer test        # PHPUnit (197 tests)
+composer test        # PHPUnit (238 tests)
 composer analyse     # PHPStan level max
 composer check       # tests + static analysis
 ```

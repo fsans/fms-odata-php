@@ -13,7 +13,9 @@ use FmsOData\Http\TransportInterface;
 use FmsOData\Metadata\MetadataFetcher;
 use FmsOData\Metadata\MetadataOptions;
 use FmsOData\Query\Query;
+use FmsOData\Scripts\ScriptInvoker;
 use FmsOData\Spec\Metadata\FMServerVersion;
+use FmsOData\Spec\Scripts\ScriptResult;
 use FmsOData\Spec\Metadata\Metadata;
 use FmsOData\Spec\Metadata\ODataMetadata;
 use FmsOData\Spec\Versions\FMVersionInfo;
@@ -92,6 +94,33 @@ class Client
         }
 
         return new Query($this->http, $this->baseUrl, $entitySet);
+    }
+
+    /**
+     * Invoke a FileMaker script at database scope.
+     *
+     * A non-zero `scriptError` is thrown as `FMScriptError`.
+     *
+     * @param string|int|float|array<string, mixed>|null $parameter
+     *
+     * @see https://github.com/fsans/fms-odata-spec/blob/main/docs/06-scripts.md
+     */
+    public function script(string $name, string|int|float|array|null $parameter = null): ScriptResult
+    {
+        return (new ScriptInvoker($this->http, $this->baseUrl))->run($name, $parameter);
+    }
+
+    /**
+     * Invoke a FileMaker script by its immutable FMSID.
+     *
+     * Requires FileMaker Server 2026+ (v26). Use
+     * `$client->hasFeature('scriptsByFMSID')` to check before calling.
+     *
+     * @param string|int|float|array<string, mixed>|null $parameter
+     */
+    public function scriptById(int $fmsid, string|int|float|array|null $parameter = null): ScriptResult
+    {
+        return (new ScriptInvoker($this->http, $this->baseUrl))->runById($fmsid, $parameter);
     }
 
     public function request(string $pathOrUrl, ?HttpRequestOptions $options = null): mixed
