@@ -8,8 +8,10 @@ use FmsOData\Entity\EntityRef;
 use FmsOData\Http\HttpClient;
 use FmsOData\Http\HttpRequestOptions;
 use FmsOData\Http\ResponseType;
+use FmsOData\Scripts\ScriptInvoker;
 use FmsOData\Spec\Query\QueryResult;
 use FmsOData\Spec\Query\SortDirection;
+use FmsOData\Spec\Scripts\ScriptResult;
 use FmsOData\Url;
 
 final class Query
@@ -139,6 +141,20 @@ final class Query
     public function byKey(string|int|bool $key): EntityRef
     {
         return new EntityRef($this->http, $this->baseUrl, $this->entitySet, $key);
+    }
+
+    /**
+     * Invoke a FileMaker script in the context of this query's entity set.
+     *
+     * For record-scope script execution use `EntityRef#script`.
+     *
+     * @param string|int|float|array<string, mixed>|null $parameter
+     *
+     * @see https://github.com/fsans/fms-odata-spec/blob/main/docs/06-scripts.md
+     */
+    public function script(string $name, string|int|float|array|null $parameter = null): ScriptResult
+    {
+        return (new ScriptInvoker($this->http, $this->baseUrl, $this->entitySet))->run($name, $parameter);
     }
 
     public function get(): QueryResult

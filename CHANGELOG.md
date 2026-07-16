@@ -5,6 +5,38 @@ All notable changes to this package are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Script execution** — `ScriptInvoker` class providing FileMaker script
+  invocation at three scopes (database, entity-set, record) by name or by
+  FMSID (v26+). Integrated into `Client::script()`, `Client::scriptById()`,
+  `Query::script()`, and `EntityRef::script()`. Non-zero script errors are
+  promoted to `FMScriptError`. Handles both the nested (v26+) and flat
+  (older FMS) response envelopes via the spec-php `Scripts` facade.
+- **Container field I/O** — `ContainerRef` class providing container
+  download (`get()`, `getStream()`), upload (binary and base64 encoding),
+  and clear (`delete()`). MIME sniffing from magic bytes, Content-Disposition
+  parsing (RFC 6266 + RFC 5987), and base64 JSON annotation building are
+  reused from the spec-php `Containers` facade. Integrated into
+  `EntityRef::container()` and `EntityRef::patchContainers()` (multi-field
+  container + regular field updates in a single PATCH).
+- `ContainerDownloadResult` DTO extending the spec-php
+  `ContainerDownload` shape with a `size` field for parity with the JS and
+  Python clients.
+- `ResponseFactory::binary()` test helper for binary response construction.
+- 41 new tests covering script invocation (URLs, scopes, FMSID, envelopes,
+  error promotion) and container I/O (download, upload, sniffing, base64,
+  clear, patchContainers, Content-Disposition parsing).
+
+### Docs
+
+- README: updated Status section (no longer "MVP"), added script and
+  container usage examples to Quick start, added ScriptInvoker and
+  ContainerRef to Architecture, added Roadmap section listing unported
+  features ($batch, schema DDL, webhooks), updated test count to 238.
+
 ## [1.0.1] — 2026-07-15
 
 ### Fixed

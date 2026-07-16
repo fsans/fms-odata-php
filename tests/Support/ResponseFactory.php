@@ -48,6 +48,16 @@ final class ResponseFactory
     /**
      * @param array<string, string> $headers
      */
+    public static function binary(int $status, string $body, array $headers = []): Response
+    {
+        $headers = \array_merge(['Content-Type' => 'application/octet-stream'], $headers);
+
+        return new Response($status, self::normalizeHeaders($headers), $body);
+    }
+
+    /**
+     * @param array<string, string> $headers
+     */
     public static function error(int $status, string $body, string $contentType = 'application/json', array $headers = []): Response
     {
         $headers = \array_merge(['Content-Type' => $contentType], $headers);
